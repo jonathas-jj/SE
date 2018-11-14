@@ -8,7 +8,7 @@
 ######  *na diferença de valor entre os dois sistemas.*
 
 #### **Lista de itens e sensores:**
-- 2 placas arduino uno;
+- 2 placas arduino ;
 - 2 sensores de temperatura;
 - 2 sensores de humidade;
 - 1 receptor de RF;
@@ -20,3 +20,7 @@
 - fios conectores e reistores;
 - 1 smartphone para receber as mensagens.
 
+Obs 14/11/2018: incremento do projeto.
+- 2 telas led para  informar os valores dos sensores de cada placa.
+- Melhorar a transmissão com antenas.
+- Incrementar o Buzzer.
