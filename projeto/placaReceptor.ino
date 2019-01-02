@@ -1,10 +1,14 @@
-// placa que vai receber e comparar os dados vindos ,via rádio, da placa com o receptor 
+    // placa que vai receber e comparar os dados vindos ,via rádio, da placa com o receptor 
 // Essa placa também conterá um modulo bluetooth que se comunicará com um smartphone enviando informações sobre os dois 
 //código do emissor
 
-
-//biblioteca display
 #include <stdio.h>
+
+//biblioteca toone
+ #define piezoPin 3 
+
+ 
+//biblioteca display
 #include <Adafruit_SSD1306.h>
 #include <Adafruit_GFX.h>
 
@@ -51,8 +55,7 @@ void setup() {
   
   Serial.begin(9600); 
   // aloca dinamicamente a mensagem
-  msg="";
-  tamanhoMsg=0;
+ 
   enviados=0;
   cli();
   UBRR0H = BAUD >> 8;
@@ -88,7 +91,8 @@ void setup() {
   dsp.display();//mostra as alteracoes no display, sem isso nao ira mostrar nada!!
   //delay(1000);
   dsp.clearDisplay();
-  
+   msg="";
+  tamanhoMsg=0;
   
 }
 
@@ -97,11 +101,13 @@ void setup() {
 
   
 void loop() {
-
-
+  
+  
   // Aguarda 2 segundos entre as medicoes
   PORTH ^=1<<LED;
   delay(2000);
+  
+  
   tamanhoMsg=0;
   // Leitura da umidade
   float h = dht.readHumidity();
@@ -126,7 +132,7 @@ void loop() {
 
 
   if (driver.recv(buf, &buflen)) { // se recebeu uma mensagem
-       //msg=(char*)buf;
+       
      
          
          tamanhoMsg=msg.length();  
@@ -134,12 +140,13 @@ void loop() {
         t_emissor= charPraFloat((char *)buf, 6, 10);//corta a mensagem e converte pra float
         h_emissor=charPraFloat((char *)buf, 0, 4);//corta a mensagem e converte pra float
 
-        if((t-t_emissor)>5){
+        if((t-t_emissor)>5 || ((t-t_emissor)< -5)){
           encheMensagem(t,h,2);
+          tone(piezoPin, 220, 200);
         }else{
            encheMensagem(t,h,1);
         }
-        UDR0=msg[0]+'0';
+        UDR0=msg[0];
          
         
     
@@ -161,14 +168,15 @@ void loop() {
 
 
 //Enche mensagem a ser enviada via bluetooth
-void encheMensagem(float temperatura, float humidade, bool flag){
+void encheMensagem(float temperatura, float humidade, int flag){
    if(flag==2) {
        msg="ATENÇÃO! DISCREPANCIA ENTRE AS MEDIDAS DE TEMPERATURA \n";
-       msg+="Temperatura emissor/receptor: "+String(charPraFloat((char *) buf, 6, 10 ),DEC)+" / "+String(temperatura,DEC) + "/n";
-       msg=msg + "Humidade emissor/receptor: "+String(charPraFloat((char *) buf, 0, 4 ),DEC)+" / "+String(humidade,DEC) + "/n";
+       msg+=" Temperatura emissor/receptor: "+String(charPraFloat((char *) buf, 6, 10 ),DEC)+" / "+String(temperatura,DEC) + "\n";
+       msg=msg + " Humidade emissor/receptor: "+String(charPraFloat((char *) buf, 0, 4 ),DEC)+" / "+String(humidade,DEC) + "\n";
     }else if(flag==1){
-     msg="Temperatura emissor/receptor: "+String(charPraFloat((char *) buf, 6, 10 ),DEC)+" / "+String(temperatura,DEC) + "/n";
-     msg=msg + "Humidade emissor/receptor: "+String(charPraFloat((char *) buf, 0, 4 ),DEC)+" / "+String(humidade,DEC) + "/n";
+      
+     msg=" Temperatura emissor/receptor: "+String(charPraFloat((char *) buf, 6, 10 ),DEC)+" / "+String(temperatura,DEC) + "\n";
+     msg=msg + " Humidade emissor/receptor: "+String(charPraFloat((char *) buf, 0, 4 ),DEC)+" / "+String(humidade,DEC) + "\n";
     }else if(flag==0){
       msg="Nenhuma Mensagem recebida do trasmissor\nTemperatura receptor:"+String(temperatura,DEC)+" Humidade receptor:"+String(humidade,DEC)+"\n";
       }
